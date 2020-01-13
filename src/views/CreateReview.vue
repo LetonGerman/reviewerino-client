@@ -299,6 +299,9 @@
       model: null,
       search: null,
     }),
+    created: {
+
+    },
     computed: {
       nameErrors() {
         const errors = [];
