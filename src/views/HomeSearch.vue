@@ -13,6 +13,7 @@
                     sm8
                     md6
             >
+                {{ chosenId }}
                 <div class="d-flex justify-end align-end">
                     <v-spacer></v-spacer>
                     <v-img
@@ -90,7 +91,6 @@
     computed: {
       fields() {
         if (!this.model) return [];
-
         return Object.keys(this.model).map(key => {
           if(key === 'description' || key === 'tags') {
             return {

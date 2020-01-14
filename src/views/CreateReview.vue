@@ -18,22 +18,39 @@
                     tile>
                 <v-list>
                     <v-list-item>
-                        <v-list-item-content>
+                        <v-list-item-content class="justify-center text-center">
                             <p
-                                    class="overline v-size--large"
+                                    class="overline display-1"
                             >
                                 You're writing a review for...
                             </p>
-                            <v-card outlined tile class="pl-1" max-width="500px" color="light">
+                            <v-card outlined tile class="pl-1 pb-2" max-width="500px" color="light">
                                 <v-list-item-title class="headline mb-1">
-                                    {{ restaurant.name }}
+                                    <v-progress-circular
+                                            v-if="updating.name"
+                                            indeterminate size="24"
+                                            color="blue"
+                                    ></v-progress-circular>
                                 </v-list-item-title>
-                                <v-list-item-subtitle v-for="(value, name, i) in restaurant.info" :key="i">
-                                    {{ infoDescriptor[name] }} : {{ value }}
+                                <v-list-item-subtitle>
+                                    <v-progress-circular
+                                            v-if="updating.address"
+                                            indeterminate size="24"
+                                            color="blue"
+                                    ></v-progress-circular>
+                                </v-list-item-subtitle>
+                                <v-list-item-title
+                                        v-if="!updating.address"
+                                        class="headline mb-1"
+                                >
+                                    {{ restaurant.name.toUpperCase() }}
+                                </v-list-item-title>
+                                <v-list-item-subtitle v-if="!updating.address">
+                                    {{ restaurant.info.address }}
                                 </v-list-item-subtitle>
                             </v-card>
                             <v-spacer></v-spacer>
-                            <v-list-item-subtitle class="mt-2 font-weight-bold">
+                            <v-list-item-subtitle class="mt-2 font-weight-bold heading justify-center">
                                 Your opinion is appreciated!
                             </v-list-item-subtitle>
                         </v-list-item-content>
@@ -244,9 +261,15 @@
 
 <script>
   import {email, integer, maxLength, minLength, required} from 'vuelidate/lib/validators';
+  import axios from 'axios';
 
   export default {
     name: 'CreateReview',
+    props: {
+      placeid: {
+        required: true
+      }
+    },
     validations: {
       name: {required, maxLength: maxLength(15)},
       email: {required, email},
@@ -285,8 +308,8 @@
       },
       infoDescriptor: {
         address: 'Address',
-        owner: 'Owner',
-        averagechk: 'Average bill',
+       // owner: 'Owner',
+       // averagechk: 'Average bill',
       },
       companyTypes: ['Couple', 'Family', 'Friends', 'Solo'],
       mealTypes: ['Breakfast', 'Lunch', 'Dinner'],
@@ -298,9 +321,22 @@
       isLoading: false,
       model: null,
       search: null,
+      updating: {
+        name: true,
+        address: true
+      }
     }),
-    created: {
-
+    created() {
+      axios
+          .get('http://localhost:3000/find/info/?placeid=' + this.placeid)
+          .then(response => {
+            this.restaurant.name = response.data.result.name;
+            this.updating.name = false;
+            this.restaurant.info.address = response.data.result.formatted_address;
+            this.updating.address = false;
+            // eslint-disable-next-line no-console
+            console.log(response);
+          });
     },
     computed: {
       nameErrors() {

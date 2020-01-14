@@ -37,9 +37,10 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/ReviewList.vue')
     },
     {
-      path: '/review/:id',
+      path: '/review/:placeid',
       name: 'add-review',
-      component: () => import(/* webpackChunkName: "about" */ './views/CreateReview')
+      component: () => import(/* webpackChunkName: "about" */ './views/CreateReview'),
+      props: true
     },
   ]
 })
