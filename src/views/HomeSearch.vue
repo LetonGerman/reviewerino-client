@@ -52,6 +52,20 @@
                                 <v-list-item-subtitle v-text="field.key"></v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
+                        <v-list-item
+                        >
+                            <v-list-item-title v-text="'Tags'"></v-list-item-title>
+                            <v-chip-group
+                                    multiple
+                                    column
+                                    active-class="primary--text"
+                                    class="pt-5 pb-0"
+                            >
+                                <v-chip filter v-for="tag in tags" :key="tag">
+                                    {{ tag }}
+                                </v-chip>
+                            </v-chip-group>
+                        </v-list-item>
                         <v-btn
                                 tile
                                 block
@@ -92,7 +106,7 @@
       fields() {
         if (!this.model) return [];
         return Object.keys(this.model).map(key => {
-          if(key === 'description' || key === 'tags') {
+          if(key === 'description') {
             return {
               key,
               value: this.model[key] || 'n/a',
@@ -123,6 +137,9 @@
           // console.log(Object.assign({}, entry, {Description}));
           // return Object.assign({}, entry, {Description});
         });
+      },
+      tags() {
+        return this.model['tags'].replace(/_/g, " ").split(', ');
       },
     },
 

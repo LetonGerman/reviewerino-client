@@ -29,6 +29,7 @@
                             </v-card>
                             <v-card
                                     class="mb-3"
+                                    v-if="!isLoading"
                             >
                                 <v-card-title class="blue pb-1 pt-1 justify-center align-center">Pricing</v-card-title>
 
@@ -58,6 +59,41 @@
                                         <v-text-field
                                                 prefix="₽"
                                                 v-model="filters.pricingRange[1]"
+                                                class="mt-0 pt-0 pb-6 pr-5 pr-2 justify-end"
+                                                hide-details
+                                                single-line
+                                                outlined
+                                                rounded
+                                                type="number"
+                                        ></v-text-field>
+                                    </v-col>
+                                </v-row>
+                            </v-card>
+                            <v-card
+                                    class="mb-3"
+                                    v-if="isLoading"
+                            >
+                                <v-card-title class="blue pb-1 pt-1 justify-center align-center">Pricing</v-card-title>
+
+                                <v-range-slider
+                                        class="pt-9 pb-0 pl-3 pr-3"
+                                >
+                                </v-range-slider>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <v-text-field
+                                                prefix="₽"
+                                                class="mt-0 pt-0 pl-5 justify-start"
+                                                hide-details
+                                                single-line
+                                                outlined
+                                                rounded
+                                                type="number"
+                                        ></v-text-field>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-text-field
+                                                prefix="₽"
                                                 class="mt-0 pt-0 pb-6 pr-5 pr-2 justify-end"
                                                 hide-details
                                                 single-line
@@ -105,45 +141,49 @@
                                     class="pt-2"
                             ></v-text-field>
                         </v-flex>
-                        <v-card
-                                v-for="(restaurant, i) in sortPlaces(filteredRestaurants)"
-                                :key="i"
-                                flat
-                                tile
-                                class="mb-3"
-                        >
-                            <v-card-title>{{restaurant.name}}</v-card-title>
-
-                            <v-card-text>
-                                <v-row
-                                        align="center"
-                                        class="mx-0"
-                                >
-                                    <v-rating
-                                            :value="restaurant.rating"
-                                            color="amber"
-                                            dense
-                                            half-increments
-                                            readonly
-                                            size="14"
-                                    ></v-rating>
-
-                                    <div class="grey--text ml-4">{{restaurant.rating}} ({{ restaurant.votes }})</div>
-                                </v-row>
-
-                                <div class="my-4 subtitle-1 black--text">
-                                    ₽ {{restaurant.averageBill}} • {{restaurant.tags.join(', ')}}
-                                </div>
-                            </v-card-text>
-                            <v-btn
-                                    block
-                                    depressed
-                                    class="grey lighten-1"
-                                    :to="'/review/' + i"
+                        <div v-if="!isLoading">
+                            <v-card
+                                    v-for="(restaurant, i) in filteredRestaurants"
+                                    :key="i"
+                                    :to="'/restaurant/' + restaurant.place_id"
+                                    flat
+                                    tile
+                                    class="mb-3"
                             >
-                                Review this restaurant
-                            </v-btn>
-                        </v-card>
+                                <v-card-title>{{restaurant.name}}</v-card-title>
+                                <v-card-subtitle>{{restaurant.formatted_address}}</v-card-subtitle>
+
+                                <v-card-text>
+                                    <v-row
+                                            align="center"
+                                            class="mx-0"
+                                    >
+                                        <v-rating
+                                                :value="restaurant.average_rating"
+                                                color="amber"
+                                                dense
+                                                half-increments
+                                                readonly
+                                                size="14"
+                                        ></v-rating>
+
+                                        <div class="grey--text ml-4">{{restaurant.average_rating}} ({{ restaurant.votes }})</div>
+                                    </v-row>
+
+                                    <div class="my-4 subtitle-1 black--text">
+                                        ₽ {{restaurant.average_check}} • {{restaurant.tags.join(', ')}}
+                                    </div>
+                                </v-card-text>
+                                <v-btn
+                                        block
+                                        depressed
+                                        class="grey lighten-1"
+                                        :to="'/review/' + i"
+                                >
+                                    Review this restaurant
+                                </v-btn>
+                            </v-card>
+                        </div>
                     </v-container>
                 </v-col>
             </v-row>
@@ -152,6 +192,8 @@
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
     name: 'RestaurantList',
     data: () => ({
@@ -161,7 +203,7 @@
       filters: {
         pricingRange: [],
         starsRange: 0,
-        chosenTags: [1],
+        chosenTags: [],
         search: ''
       },
       infoDescriptor: {
@@ -170,31 +212,20 @@
         averagechk: 'Average bill',
       },
       restaurants: [{
-        name: 'Cafe Baldilico',
-        rating: 4.5,
-        votes: 413,
-        averageBill: 300,
-        tags: ['Italian', 'Cafe'],
-        description: 'Small plates, salads & sandwiches an inteimate setting with 12 indoor seats plus patio seating.'
-      }, {
-        name: 'Il Milanese',
-        rating: 5.0,
-        votes: 666,
-        averageBill: 760,
-        tags: ['Italian', 'Pizza', 'Restaurant'],
-        description: 'Whatever.'
-      }, {
-        name: 'teskno',
-        rating: 3.5,
-        votes: 666,
-        averageBill: 777,
-        tags: ['Polish', 'Restaurant'],
-        description: 'Whatever again.'
+        place_id: '',
+        name: '',
+        formatted_address: '',
+        average_rating: 0,
+        average_check: 0,
+        checks: [],
+        ratings: [],
+        tags: [],
+        votes: null
       }],
       companyTypes: ['Couple', 'Family', 'Friends', 'Solo'],
       mealTypes: ['Breakfast', 'Lunch', 'Dinner'],
       tags: ['Lodging', 'Cafe', 'Restaurant', 'Bar', 'Night Club'],
-      isLoading: false,
+      isLoading: true,
       model: null,
       restaurantSearch: '',
     }),
@@ -206,9 +237,9 @@
           }).filter((res) => {
             return this.filters.chosenTags.some(r => res.tags.indexOf(this.tags[r]) >= 0)
           }).filter((res) => {
-            return ((res.averageBill >= this.filters.pricingRange[0]) && (res.averageBill <= this.filters.pricingRange[1]))
+            return ((res.average_check >= this.filters.pricingRange[0]) && (res.average_check <= this.filters.pricingRange[1]))
           }).filter((res) => {
-            return res.rating >= this.filters.starsRange;
+            return res.average_rating >= this.filters.starsRange;
           })
         } else {
           return this.restaurants.filter((res) => {
@@ -218,24 +249,43 @@
             // console.log(res.averageBill);
             // eslint-disable-next-line no-console
             // console.log(this.filters.pricingRange[0] + ' ' + this.filters.pricingRange[1])
-            return ((res.averageBill >= this.filters.pricingRange[0]) && (res.averageBill <= this.filters.pricingRange[1]))
+            return ((res.average_check >= this.filters.pricingRange[0]) && (res.average_check <= this.filters.pricingRange[1]))
           }).filter((res) => {
-            return res.rating >= this.filters.starsRange;
+            return res.average_rating >= this.filters.starsRange;
           })
         }
       },
       billRange() {
-        let min = Math.min.apply(Math, this.restaurants.map(function(o) { return o.averageBill; }));
-        let max = Math.max.apply(Math, this.restaurants.map(function(o) { return o.averageBill; }));
+        let min = Math.min.apply(Math, this.restaurants.map(function(o) { return o.average_check; }));
+        let max = Math.max.apply(Math, this.restaurants.map(function(o) { return o.average_check; }));
         return [min, max];
       }
     },
-    methods: {
-      sortPlaces(places) {
-        return places.slice().sort((a, b) => (a.rating < b.rating) ? 1 : -1)
-      },
+    watch: {
+
     },
     created() {
+      axios
+      .get('http://localhost:3000/restaurant/')
+      .then(res => {
+        this.restaurants = res.data.data;
+        // eslint-disable-next-line no-console
+        console.log(this.restaurants);
+        let tempTags = [];
+        if(this.restaurants.length > 0) {
+          for (let restaurant in this.restaurants) {
+            for (let tag in restaurant.tags) {
+              // eslint-disable-next-line no-console
+              tempTags.indexOf(tag) === -1 ? tempTags.push(tag) : console.log("This item already exists");
+            }
+          }
+          // this.tags = tempTags;
+          // eslint-disable-next-line no-console
+          console.log(tempTags);
+        }
+        this.isLoading = false;
+      });
+
       this.filters.pricingRange = this.range;
     },
     updated() {

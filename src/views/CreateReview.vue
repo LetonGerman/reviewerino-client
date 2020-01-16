@@ -6,7 +6,7 @@
                     <v-card-text class="justify-center">Your response was submitted!</v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn :to="'/restaurant/' + 1" color="green darken-1" flat @click="reviewSubmitted = false">
+                        <v-btn :to="'/restaurant/' + this.placeid" color="green darken-1" text @click="reviewSubmitted = false">
                             OK
                         </v-btn>
                         <v-spacer></v-spacer>
@@ -260,6 +260,8 @@
 </template>
 
 <script>
+  /* eslint-disable no-console */
+
   import {email, integer, maxLength, minLength, required} from 'vuelidate/lib/validators';
   import axios from 'axios';
 
@@ -303,7 +305,7 @@
           address: 'Yolo ave. 21',
           owner: 'queen poki',
           averagechk: '$50',
-
+          tags: []
         },
       },
       infoDescriptor: {
@@ -334,8 +336,9 @@
             this.updating.name = false;
             this.restaurant.info.address = response.data.result.formatted_address;
             this.updating.address = false;
+            this.restaurant.info.tags = response.data.result.types;
             // eslint-disable-next-line no-console
-            console.log(response);
+            // console.log(response);
           });
     },
     computed: {
@@ -369,7 +372,7 @@
         const errors = [];
         if (!this.$v.reviewText.$dirty) return errors;
         !this.$v.reviewText.required && errors.push('Review text is required');
-        !this.$v.reviewText.minLength && errors.push('Name must be at least 20 characters long');
+            !this.$v.reviewText.minLength && errors.push('Review must be at least 20 characters long');
         return errors;
       },
       companyErrors() {
@@ -410,23 +413,37 @@
         this.$v.check.$touch();
         this.$v.agreement.$touch();
 
-        if (!this.$v.name.$dirty &&
-            !this.$v.email.$dirty &&
-            !this.$v.rating.$dirty &&
-            !this.$v.reviewDescription.$dirty &&
-            !this.$v.reviewText.$dirty &&
-            !this.$v.companyType.$dirty &&
-            !this.$v.mealType.$dirty &&
-            !this.$v.check.$dirty &&
-            !this.$v.agreement.$dirty) {
+        console.log(this.nameErrors);
+        console.log(this.emailErrors);
+        console.log(this.reviewDescriptionErrors);
+        console.log(this.ratingErrors);
+        console.log(this.reviewTextErrors);
+        console.log(this.companyErrors);
+        console.log(this.mealErrors);
+        console.log(this.checkErrors);
+        console.log(this.agreementErrors);
+
+
+        if (this.nameErrors.length === 0 &&
+            this.emailErrors.length === 0 &&
+            this.reviewDescriptionErrors.length === 0 &&
+            this.ratingErrors.length === 0 &&
+            this.reviewTextErrors.length === 0 &&
+            this.companyErrors.length === 0 &&
+            this.mealErrors.length === 0 &&
+            this.checkErrors.length === 0 &&
+            this.agreementErrors.length === 0) {
           this.sendReview();
         } else {
-          return;
+          // eslint-disable-next-line no-console
+          console.log('error');
         }
       },
       sendReview() {
+        const today = new Date();
+        const date = today.getDate()+'.'+(today.getMonth()+1)+'.'+today.getFullYear();
         this.$v.rating.$touch();
-        let review = {
+        let reviewBody = {
           name: this.$v.name.$model,
           email: this.$v.email.$model,
           rating: this.$v.rating.$model,
@@ -434,11 +451,34 @@
           reviewText: this.$v.reviewText.$model,
           companyType: this.companyTypes[this.$v.companyType.$model],
           mealType: this.$v.mealType.$model,
-          check: this.$v.check.$model,
+          check: parseInt(this.$v.check.$model, 10),
+        };
+        let review = {
+          place_id: this.placeid,
+          review: reviewBody,
+          created: date,
         };
         // eslint-disable-next-line no-console
-        console.log(review);
-        this.reviewSubmitted = true;
+        // console.log(review);
+
+        axios.post('http://localhost:3000/restaurant', {place_id: this.placeid, name: this.restaurant.name, formatted_address: this.restaurant.info.address, tags: this.restaurant.info.tags})
+        .then(res => {
+          // console.log(res.status === 200);
+          if(res.status === 200) {
+            console.log(this.placeid + ' ' + this.$v.rating.$model);
+            axios.put('http://localhost:3000/restaurant', {place_id: this.placeid, rating: this.$v.rating.$model, check: this.$v.check.$model})
+            .then(res => {
+              console.log(res.data);
+            })
+          }
+        })
+
+        axios.post('http://localhost:3000/review', review)
+            .then(res => {
+            // eslint-disable-next-line no-console
+                console.log(res);
+                this.reviewSubmitted = true;
+            });
       },
     },
   };

@@ -32,9 +32,10 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/TopRestaurants.vue')
     },
     {
-      path: '/restaurant/:id',
+      path: '/restaurant/:placeid',
       name: 'reviews',
-      component: () => import(/* webpackChunkName: "about" */ './views/ReviewList.vue')
+      component: () => import(/* webpackChunkName: "about" */ './views/ReviewList.vue'),
+      props: true
     },
     {
       path: '/review/:placeid',
