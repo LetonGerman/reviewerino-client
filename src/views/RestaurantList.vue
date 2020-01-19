@@ -256,9 +256,9 @@
         }
       },
       billRange() {
-        let min = Math.min.apply(Math, this.restaurants.map(function(o) { return o.average_check; }));
-        let max = Math.max.apply(Math, this.restaurants.map(function(o) { return o.average_check; }));
-        return [min, max];
+          let min = Math.min(this.restaurants.map(o => o.average_check));
+          let max = Math.max(this.restaurants.map(o => o.average_check));
+          return [min, max];
       }
     },
     watch: {
@@ -270,23 +270,30 @@
       .then(res => {
         this.restaurants = res.data.data;
         // eslint-disable-next-line no-console
+        console.log(res.data);
+        // eslint-disable-next-line no-console
         console.log(this.restaurants);
         let tempTags = [];
         if(this.restaurants.length > 0) {
           for (let restaurant in this.restaurants) {
             for (let tag in restaurant.tags) {
               // eslint-disable-next-line no-console
+              console.log(tag);
+              // eslint-disable-next-line no-console
               tempTags.indexOf(tag) === -1 ? tempTags.push(tag) : console.log("This item already exists");
             }
           }
-          // this.tags = tempTags;
+          if(tempTags.length > 0) {
+            this.tags = tempTags;
+          }
           // eslint-disable-next-line no-console
           console.log(tempTags);
         }
+
         this.isLoading = false;
       });
 
-      this.filters.pricingRange = this.range;
+      this.filters.pricingRange = this.billRange;
     },
     updated() {
       // eslint-disable-next-line no-console
