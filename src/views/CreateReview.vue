@@ -1,12 +1,14 @@
 <template>
     <div>
         <v-container class="_cont">
-            <v-dialog v-model="reviewSubmitted" persistent max-width="350">
+            <v-dialog max-width="350" persistent v-model="reviewSubmitted">
                 <v-card>
-                    <v-card-text class="justify-center">Your response was submitted!</v-card-text>
+                    <v-card-text class="justify-center text-center">Your response was submitted!</v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn :to="'/restaurant/' + this.placeid" color="green darken-1" text @click="reviewSubmitted = false">
+                        <v-btn :to="'/restaurant/' + this.placeid" @click="reviewSubmitted = false"
+                               color="green darken-1"
+                               text>
                             OK
                         </v-btn>
                         <v-spacer></v-spacer>
@@ -24,24 +26,24 @@
                             >
                                 You're writing a review for...
                             </p>
-                            <v-card outlined tile class="pl-1 pb-2" max-width="500px" color="light">
+                            <v-card class="pl-1 pb-2" color="light" max-width="500px" outlined tile>
                                 <v-list-item-title class="headline mb-1">
                                     <v-progress-circular
-                                            v-if="updating.name"
-                                            indeterminate size="24"
                                             color="blue"
+                                            indeterminate size="24"
+                                            v-if="updating.name"
                                     ></v-progress-circular>
                                 </v-list-item-title>
                                 <v-list-item-subtitle>
                                     <v-progress-circular
-                                            v-if="updating.address"
-                                            indeterminate size="24"
                                             color="blue"
+                                            indeterminate size="24"
+                                            v-if="updating.address"
                                     ></v-progress-circular>
                                 </v-list-item-subtitle>
                                 <v-list-item-title
-                                        v-if="!updating.address"
                                         class="headline mb-1"
+                                        v-if="!updating.address"
                                 >
                                     {{ restaurant.name.toUpperCase() }}
                                 </v-list-item-title>
@@ -62,24 +64,23 @@
                     flat
                     tile>
                 <form
-                        action="POST"
                         @submit.prevent="validateReview"
                 >
                     <v-card-title>
                         Your name
                     </v-card-title>
                     <v-text-field
+                            :error-messages="nameErrors"
+                            @blur="$v.name.$touch()"
+                            @input="$v.name.$touch()"
+                            @onpaste="$v.name.$touch()"
                             class="pl-4 pr-4"
+                            dense
                             filled
                             outlined
-                            dense
-                            required
                             placeholder="Ivan"
+                            required
                             v-model="name"
-                            @input="$v.name.$touch()"
-                            @blur="$v.name.$touch()"
-                            @onpaste="$v.name.$touch()"
-                            :error-messages="nameErrors"
                     >
 
                     </v-text-field>
@@ -87,17 +88,17 @@
                         Your email
                     </v-card-title>
                     <v-text-field
+                            :error-messages="emailErrors"
+                            @blur="$v.email.$touch()"
+                            @input="$v.email.$touch()"
+                            @onpaste="$v.email.$touch()"
                             class="pl-4 pr-4"
+                            dense
                             filled
                             outlined
-                            dense
-                            required
                             placeholder="example@mail.com"
+                            required
                             v-model="email"
-                            @input="$v.email.$touch()"
-                            @blur="$v.email.$touch()"
-                            @onpaste="$v.email.$touch()"
-                            :error-messages="emailErrors"
                     >
 
                     </v-text-field>
@@ -105,20 +106,20 @@
                         How would your rate this restaurant overall?
                     </v-card-title>
                     <v-rating
-                            v-model="rating"
-                            class="pl-4 pr-4"
+                            :error-messages="ratingErrors"
+                            @blur="$v.rating.$touch()"
+                            @change="$v.rating.$touch()"
                             background-color="grey darken-2"
-                            large
+                            class="pl-4 pr-4"
                             half-increments
                             hover
+                            large
                             required
-                            @change="$v.rating.$touch()"
-                            @blur="$v.rating.$touch()"
-                            :error-messages="ratingErrors"
+                            v-model="rating"
                     ></v-rating>
                     <p
-                            v-if="ratingErrors"
                             class="red--text pl-4"
+                            v-if="ratingErrors"
                     >
                         {{ ratingErrors[0] }}
                     </p>
@@ -126,17 +127,17 @@
                         Review description
                     </v-card-title>
                     <v-text-field
+                            :error-messages="reviewDescriptionErrors"
+                            @blur="$v.reviewDescription.$touch()"
+                            @input="$v.reviewDescription.$touch()"
+                            @onpaste="$v.reviewDescription.$touch()"
                             class="pl-4 pr-4"
+                            dense
                             filled
                             outlined
-                            dense
-                            required
                             placeholder="A happy ending in a nice restaurant"
+                            required
                             v-model="reviewDescription"
-                            @input="$v.reviewDescription.$touch()"
-                            @blur="$v.reviewDescription.$touch()"
-                            @onpaste="$v.reviewDescription.$touch()"
-                            :error-messages="reviewDescriptionErrors"
                     >
 
                     </v-text-field>
@@ -144,19 +145,19 @@
                         Your review
                     </v-card-title>
                     <v-textarea
-                            class="pl-4 pr-4"
+                            :error-messages="reviewTextErrors"
+                            @blur="$v.reviewText.$touch()"
+                            @input="$v.reviewText.$touch()"
+                            @onpaste="$v.reviewText.$touch()"
                             auto-grow
-                            filled
-                            outlined
+                            class="pl-4 pr-4"
                             counter
                             dense
-                            requried
+                            filled
+                            outlined
                             placeholder="Your thoughts..."
+                            requried
                             v-model="reviewText"
-                            @input="$v.reviewText.$touch()"
-                            @blur="$v.reviewText.$touch()"
-                            @onpaste="$v.reviewText.$touch()"
-                            :error-messages="reviewTextErrors"
                     >
                     </v-textarea>
                     <v-card-title
@@ -168,19 +169,19 @@
                                 cols="12"
                         >
                             <v-btn-toggle
+                                    @blur="$v.companyType.$touch()"
+                                    @change="$v.companyType.$touch()"
                                     borderless
-                                    tile
                                     class="pl-4"
                                     color="blue accent-3"
-                                    v-model="companyType"
                                     required
-                                    @change="$v.companyType.$touch()"
-                                    @blur="$v.companyType.$touch()"
+                                    tile
+                                    v-model="companyType"
                             >
                                 <v-btn
-                                        v-for="(type, i) in companyTypes"
                                         :key="i"
                                         class="mr-3 grey lighten-2"
+                                        v-for="(type, i) in companyTypes"
                                 >
                                     {{ type }}
                                 </v-btn>
@@ -188,8 +189,8 @@
                         </v-col>
                     </v-row>
                     <p
-                            v-if="companyErrors"
                             class="red--text pl-4"
+                            v-if="companyErrors"
                     >
                         {{ companyErrors[0] }}
                     </p>
@@ -197,57 +198,57 @@
                         What did you have?
                     </v-card-title>
                     <v-select
-                            filled
-                            outlined
-                            dense
-                            required
+                            :error-messages="mealErrors"
                             :items="mealTypes"
                             :placeholder="mealTypes[0]"
-                            class="pl-4 pr-4"
-                            v-model="mealType"
-                            @change="$v.mealType.$touch()"
                             @blur="$v.mealType.$touch()"
-                            :error-messages="mealErrors"
+                            @change="$v.mealType.$touch()"
+                            class="pl-4 pr-4"
+                            dense
+                            filled
+                            outlined
+                            required
+                            v-model="mealType"
                     >
                     </v-select>
                     <v-card-title>
                         How much did you pay (approximately)?
                     </v-card-title>
                     <v-text-field
+                            :error-messages="checkErrors"
+                            @blur="$v.check.$touch()"
+                            @input="$v.check.$touch()"
+                            @onpaste="$v.check.$touch()"
+                            class="pl-4 pr-4"
                             filled
                             outlined
-                            required
-                            prefix="₽"
-                            class="pl-4 pr-4"
                             placeholder="1337"
+                            prefix="₽"
+                            required
                             v-model="check"
-                            @input="$v.check.$touch()"
-                            @blur="$v.check.$touch()"
-                            @onpaste="$v.check.$touch()"
-                            :error-messages="checkErrors"
                     >
                     </v-text-field>
                     <v-card-title>
                         Confirm your review
                     </v-card-title>
                     <v-checkbox
-                            align="top"
+                            :error-messages="agreementErrors"
                             :label="confirmMessage"
+                            @blur="$v.agreement.$touch()"
+                            @change="$v.agreement.$touch()"
+                            align="top"
                             class="pl-4 pr-4"
                             required
                             v-model="agreement"
-                            @change="$v.agreement.$touch()"
-                            @blur="$v.agreement.$touch()"
-                            :error-messages="agreementErrors"
                     >
                     </v-checkbox>
                     <v-row
-                            justify="center"
                             class="mb-12 pb-6"
+                            justify="center"
                     >
                         <v-btn
+                                class="light-blue white--text"
                                 large
-                                class="pink white--text"
                                 type="submit"
                         >
                             Submit
@@ -269,8 +270,8 @@
     name: 'CreateReview',
     props: {
       placeid: {
-        required: true
-      }
+        required: true,
+      },
     },
     validations: {
       name: {required, maxLength: maxLength(15)},
@@ -305,13 +306,11 @@
           address: 'Yolo ave. 21',
           owner: 'queen poki',
           averagechk: '$50',
-          tags: []
+          tags: [],
         },
       },
       infoDescriptor: {
         address: 'Address',
-       // owner: 'Owner',
-       // averagechk: 'Average bill',
       },
       companyTypes: ['Couple', 'Family', 'Friends', 'Solo'],
       mealTypes: ['Breakfast', 'Lunch', 'Dinner'],
@@ -325,21 +324,17 @@
       search: null,
       updating: {
         name: true,
-        address: true
-      }
+        address: true,
+      },
     }),
     created() {
-      axios
-          .get('http://localhost:3000/find/info/?placeid=' + this.placeid)
-          .then(response => {
-            this.restaurant.name = response.data.result.name;
-            this.updating.name = false;
-            this.restaurant.info.address = response.data.result.formatted_address;
-            this.updating.address = false;
-            this.restaurant.info.tags = response.data.result.types;
-            // eslint-disable-next-line no-console
-            // console.log(response);
-          });
+      axios.get('http://localhost:3000/find/info/?placeid=' + this.placeid).then(response => {
+        this.restaurant.name = response.data.result.name;
+        this.updating.name = false;
+        this.restaurant.info.address = response.data.result.formatted_address;
+        this.updating.address = false;
+        this.restaurant.info.tags = response.data.result.types;
+      });
     },
     computed: {
       nameErrors() {
@@ -372,7 +367,7 @@
         const errors = [];
         if (!this.$v.reviewText.$dirty) return errors;
         !this.$v.reviewText.required && errors.push('Review text is required');
-            !this.$v.reviewText.minLength && errors.push('Review must be at least 20 characters long');
+        !this.$v.reviewText.minLength && errors.push('Review must be at least 20 characters long');
         return errors;
       },
       companyErrors() {
@@ -413,17 +408,6 @@
         this.$v.check.$touch();
         this.$v.agreement.$touch();
 
-        console.log(this.nameErrors);
-        console.log(this.emailErrors);
-        console.log(this.reviewDescriptionErrors);
-        console.log(this.ratingErrors);
-        console.log(this.reviewTextErrors);
-        console.log(this.companyErrors);
-        console.log(this.mealErrors);
-        console.log(this.checkErrors);
-        console.log(this.agreementErrors);
-
-
         if (this.nameErrors.length === 0 &&
             this.emailErrors.length === 0 &&
             this.reviewDescriptionErrors.length === 0 &&
@@ -434,14 +418,11 @@
             this.checkErrors.length === 0 &&
             this.agreementErrors.length === 0) {
           this.sendReview();
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('error');
         }
       },
       sendReview() {
         const today = new Date();
-        const date = today.getDate()+'.'+(today.getMonth()+1)+'.'+today.getFullYear();
+        const date = today.getDate() + '.' + (today.getMonth() + 1) + '.' + today.getFullYear();
         this.$v.rating.$touch();
         let reviewBody = {
           name: this.$v.name.$model,
@@ -458,26 +439,26 @@
           review: reviewBody,
           created: date,
         };
-        // eslint-disable-next-line no-console
-        // console.log(review);
 
-        axios.post('http://localhost:3000/restaurant', {place_id: this.placeid, name: this.restaurant.name, formatted_address: this.restaurant.info.address, tags: this.restaurant.info.tags})
-        .then(res => {
-          // console.log(res.status === 200);
-          if(res.status === 200) {
-            console.log(this.placeid + ' ' + this.$v.rating.$model);
-            axios.put('http://localhost:3000/restaurant', {place_id: this.placeid, rating: this.$v.rating.$model, check: this.$v.check.$model})
-            .then(res => {
-              console.log(res.data);
-            })
+        axios.post('http://localhost:3000/restaurant', {
+          place_id: this.placeid,
+          name: this.restaurant.name,
+          formatted_address: this.restaurant.info.address,
+          tags: this.restaurant.info.tags,
+        }).then(res => {
+          if (res.status === 200) {
+            axios.put('http://localhost:3000/restaurant',
+                {place_id: this.placeid, rating: this.$v.rating.$model, check: this.$v.check.$model})
+                // eslint-disable-next-line no-unused-vars
+                .then(res => {
+                });
           }
-        })
+        });
 
         axios.post('http://localhost:3000/review', review)
+            // eslint-disable-next-line no-unused-vars
             .then(res => {
-            // eslint-disable-next-line no-console
-                console.log(res);
-                this.reviewSubmitted = true;
+              this.reviewSubmitted = true;
             });
       },
     },
